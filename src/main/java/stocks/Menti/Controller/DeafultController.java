@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,24 +29,24 @@ import twitter4j.conf.ConfigurationBuilder;
 @RestController
 public class DeafultController {
     
-    public static Twitter getTwitterinstance() {
+        public static Twitter getTwitterinstance() {
 		
 		Twitter twitter = TwitterFactory.getSingleton();
 		return twitter;
 		
 	}
 
-	@GetMapping("/")
-	public List<String> searchTweets() throws TwitterException {
+	@GetMapping("/{stockName}")
+	public List<String> searchTweets(@PathVariable("stockName") String stockName) throws TwitterException {
         
-        Twitter twitter = getTwitterinstance();
-        Query query = new Query("Bruno Mars");
-        QueryResult result = twitter.search(query);
-        List<Status> statuses = result.getTweets();
-        return statuses.stream().map(
-            item -> item.getText()).collect(
-                    Collectors.toList());
-        //return "Greetings from Spring Boot!";
+                Twitter twitter = getTwitterinstance();
+                Query query = new Query(stockName);
+                QueryResult result = twitter.search(query);
+                List<Status> statuses = result.getTweets();
+                return statuses.stream().map(
+                item -> item.getText()).collect(
+                        Collectors.toList());
+                //return "Greetings from Spring Boot!";
 	}
     
 }
