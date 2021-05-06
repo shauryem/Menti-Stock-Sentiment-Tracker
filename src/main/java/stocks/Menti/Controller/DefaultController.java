@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import stocks.Menti.Service.ServiceSentiment;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,8 +29,14 @@ import twitter4j.conf.ConfigurationBuilder;
 
 
 @RestController
-public class DeafultController {
+public class DefaultController {
     
+        private ServiceSentiment serviceSentiment;
+
+        public DefaultController(ServiceSentiment serviceSentiment){
+                this.serviceSentiment = serviceSentiment;
+        }
+
         public static Twitter getTwitterinstance() {
 		
 		Twitter twitter = TwitterFactory.getSingleton();
@@ -37,15 +45,16 @@ public class DeafultController {
 	}
 
 	@GetMapping("/{stockName}")
-	public List<String> searchTweets(@PathVariable("stockName") String stockName) throws TwitterException {
+	public String searchTweets(@PathVariable("stockName") String stockName) throws TwitterException {
         
                 Twitter twitter = getTwitterinstance();
                 Query query = new Query(stockName);
                 QueryResult result = twitter.search(query);
                 List<Status> statuses = result.getTweets();
-                return statuses.stream().map(
+                String sent = serviceSentiment.getSentiment(statuses.stream().map(
                 item -> item.getText()).collect(
-                        Collectors.toList());
+                        Collectors.toList()));
+                return sent;
                 //return "Greetings from Spring Boot!";
 	}
     
