@@ -50,7 +50,7 @@ public class ServiceSentiment {
         return sent;
     }
 
-    private String sentimentHelper(String stockList){
+    private int sentimentHelper(String stockList){
         
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, parse, sentiment");
@@ -69,8 +69,39 @@ public class ServiceSentiment {
                 longest = partText.length();
             }
         }
-        System.out.println(text);
-        switch (mainSentiment){
+
+        return mainSentiment;
+        // System.out.println(text);
+        // switch (mainSentiment){
+        //     case 0:
+        //         return("Very Negative");
+        //     case 1:
+        //         return("Negative");
+        //     case 2:
+        //         return("Neutral");
+        //     case 3:
+        //         return("Positive");
+        //     case 4:
+        //         return("Very Positive");
+        // }
+        
+        
+        
+        
+        // return "Neutral";
+    }
+
+    public String getSentiment(String stockName) throws TwitterException{
+        List<String> stockList = queryHelper(stockName);
+        //List<String> sentimentList = new ArrayList<>();
+        int runningSum = 0;
+        int avgScore = 0;
+        for(String s: stockList){
+            runningSum += sentimentHelper(s);
+        }
+        avgScore = (int)Math.rint(runningSum/stockList.size());
+        
+         switch (avgScore){
             case 0:
                 return("Very Negative");
             case 1:
@@ -81,20 +112,11 @@ public class ServiceSentiment {
                 return("Positive");
             case 4:
                 return("Very Positive");
+            default:
+                return("none");
         }
-        
-        
-        
-        
-        return "Neutral";
-    }
 
-    public List<String> getSentiment(String stockName) throws TwitterException{
-        List<String> stockList = queryHelper(stockName);
-        List<String> sentimentList = new ArrayList<>();
-        for(String s: stockList){
-            sentimentList.add(sentimentHelper(s));
-        }
-        return sentimentList;
+
+       
     }
 }

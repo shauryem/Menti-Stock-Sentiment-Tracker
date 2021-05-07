@@ -30,7 +30,7 @@ public class DefaultController {
 
 
 	@GetMapping("/{stockName}")
-	public List<String> searchTweets(@PathVariable("stockName") String stockName) throws TwitterException {
+	public String searchTweets(@PathVariable("stockName") String stockName) throws TwitterException {
                 return serviceSentiment.getSentiment(stockName);
 
 	}
