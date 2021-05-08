@@ -94,6 +94,10 @@ public class ServiceSentiment {
     public String getSentiment(String stockName) throws TwitterException{
         List<String> stockList = queryHelper(stockName);
         //List<String> sentimentList = new ArrayList<>();
+
+        if(stockList.isEmpty()){
+            return "Neutral";
+        }
         int runningSum = 0;
         int avgScore = 0;
         for(String s: stockList){
