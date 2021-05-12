@@ -3,6 +3,7 @@ package stocks.Menti.Controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,13 +20,15 @@ import twitter4j.TwitterException;
 
 
 @RestController
+@RequestMapping("/api/v1")
 public class DefaultController {
     
+        @Autowired
         private ServiceSentiment serviceSentiment;
 
-        public DefaultController(ServiceSentiment serviceSentiment){
-                this.serviceSentiment = serviceSentiment;
-        }
+        // public DefaultController(ServiceSentiment serviceSentiment){
+        //         this.serviceSentiment = serviceSentiment;
+        // }
 
 
 
