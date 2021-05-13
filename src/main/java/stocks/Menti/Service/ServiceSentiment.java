@@ -3,6 +3,11 @@ package stocks.Menti.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.stereotype.Service;
 
@@ -31,6 +36,16 @@ import twitter4j.conf.ConfigurationBuilder;
 @Service
 public class ServiceSentiment {
     
+    ThreadPoolExecutor threads;
+    AtomicInteger sum;
+    CountDownLatch latch;
+
+    public ServiceSentiment(){
+        this.threads = (ThreadPoolExecutor) Executors.newFixedThreadPool(8);
+        this.sum = new AtomicInteger(); 
+        
+    }
+
     public static Twitter getTwitterinstance() {
 		
 		Twitter twitter = TwitterFactory.getSingleton();
@@ -50,7 +65,7 @@ public class ServiceSentiment {
         return sent;
     }
 
-    private int sentimentHelper(String stockList){
+    private void sentimentHelper(String stockList){
         
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, parse, sentiment");
@@ -70,40 +85,42 @@ public class ServiceSentiment {
             }
         }
 
-        return mainSentiment;
-        // System.out.println(text);
-        // switch (mainSentiment){
-        //     case 0:
-        //         return("Very Negative");
-        //     case 1:
-        //         return("Negative");
-        //     case 2:
-        //         return("Neutral");
-        //     case 3:
-        //         return("Positive");
-        //     case 4:
-        //         return("Very Positive");
-        // }
-        
-        
-        
-        
-        // return "Neutral";
+        sum.set(sum.get() +mainSentiment);
+        latch.countDown();
+       // return mainSentiment;
+
     }
 
     public String getSentiment(String stockName) throws TwitterException{
+        
         List<String> stockList = queryHelper(stockName);
+        latch = new CountDownLatch(8);
         //List<String> sentimentList = new ArrayList<>();
 
         if(stockList.isEmpty()){
             return "Neutral";
         }
+        //return "yes";
         int runningSum = 0;
         int avgScore = 0;
         for(String s: stockList){
-            runningSum += sentimentHelper(s);
+            //runningSum += sentimentHelper(s);
+            threads.execute(new Runnable() {
+                @Override 
+                public void run() {
+                    sentimentHelper(s);
+                }
+            });
         }
-        avgScore = (int)Math.rint(runningSum/stockList.size());
+        // threads.invokeAll()
+
+        try {
+            latch.await();
+          } catch (InterruptedException E) {
+             // handle
+          }
+           
+        avgScore = (int)Math.rint(sum.intValue()/stockList.size());
         
          switch (avgScore){
             case 0:
